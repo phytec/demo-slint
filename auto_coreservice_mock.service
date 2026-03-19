@@ -4,7 +4,7 @@ Description=Mocker for the CoreService, which automatically rotates through stat
  
 [Service]
 Restart=on-failure
-ExecStart=/usr/bin/node /opt/coffeemachine-app/auto_coreservice_mock.js
+ExecStart=/usr/bin/node /usr/share/coffeeapp/auto_coreservice_mock.js
 RestartSec=5
  
 [Install]
