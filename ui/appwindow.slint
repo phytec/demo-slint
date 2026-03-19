@@ -1,0 +1,102 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+import { Button, VerticalBox } from "std-widgets.slint";
+import { Palette } from "./assets/colors.slint";
+import { MainScreen } from "screens/main-screen.slint";
+import { ManualSelectionScreen } from "screens/manual-selection.slint";
+import { Ingredient } from "./models/ingredient.slint";
+import { Product } from "./models/products.slint";
+import { ErrorType } from "./models/error-types.slint";
+import { ErrorOverlay } from "components/error-overlay.slint";
+import { UiState } from "./models/ui-states.slint";
+
+export component AppWindow inherits Window {
+    height: 800px;
+    width: 1280px;
+    background: Palette.background_dark;
+
+    in-out property <UiState> state: idle;
+
+    /// Elapsed time since state change. Resolution 100ms, max 1min
+    in-out property <duration> elapsed_since_state_change: 0ms;
+    
+    in-out property <Product> current_production;
+
+    in-out property <[Product]> products: [];
+    in-out property <[Product]> selectable_products: [];
+
+    in-out property <[Ingredient]> ingredients: [];
+
+    in property <ErrorType> current_error: none;
+    in-out property <bool> show_error_overlay: false;
+
+    callback change_state(UiState);
+
+    callback start_production(int);
+
+    callback toggled_error_overlay(bool);
+
+    callback abort_production();
+
+    MainScreen { 
+        x: root.state != UiState.manual-selection ? 0 : -parent.width - parent.x - 2px;
+        state: root.state;
+        elapsed_since_state_change: root.elapsed_since_state_change;
+        ingredients: root.ingredients;
+        current-production: root.current_production;
+        enabled: !show_error_overlay;
+        show_error_icon: current_error != ErrorType.none && !show_error_overlay;
+        overlay_shown: show_error_overlay;
+
+        set-manual-select => {
+            root.change-state(UiState.manual-selection);
+        }
+        abort-production => {root.abort-production()}
+        open_error_dialog => {
+            if (current_error != ErrorType.none) {
+                show_error_overlay = true;
+                toggled_error_overlay(show_error_overlay);
+            }
+        }
+        animate x { duration: 1000ms; easing: ease;}
+    }
+
+    ManualSelectionScreen {
+        products: root.selectable_products;
+        x: root.state == UiState.manual-selection ? 0 : parent.width + parent.x + 2px;
+        enabled: !show_error_overlay;
+        show_error_icon: current_error != ErrorType.none && !show_error_overlay;
+        no_production_possible: current_error != ErrorType.none;
+
+        set-auto-selection() => {root.change_state(UiState.idle)}
+        start-production(value) => {root.start-production(value)}
+        open_error_dialog => {
+            if (current_error != ErrorType.none) {
+                show_error_overlay = true;
+                toggled_error_overlay(show_error_overlay);
+            }
+        }
+        animate x { duration: 1000ms; easing: ease;}
+    }
+
+    overlay-shadow := Rectangle {
+        height: 800px;
+        width: 1280px;
+        background: parent.background.mix(rgb(180, 200, 255), 70%);
+
+        opacity: root.show_error_overlay? 80% : 0%;
+        animate opacity { duration: 200ms; }
+    }
+
+    ErrorOverlay {
+        width: 80%;
+        height: 80%;
+        x: (parent.width - self.width) / 2.;
+        y: root.show_error_overlay? (parent.height - self.height) / 2. : -parent.height - parent.y - 100px;
+        animate y { duration: 200ms; easing: ease; }
+
+        close_overlay => {
+            root.show_error_overlay = false;
+            root.toggled_error_overlay(show_error_overlay);
+        }
+    }
+}

@@ -1,0 +1,88 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+import { Palette } from "../assets/colors.slint";
+import "../assets/fonts/Roboto/Roboto-Regular.ttf";
+import { UiState } from "../models/ui-states.slint";
+
+export component Toolbar inherits HorizontalLayout {
+    in property <string> toggle_state_text;
+    in property <UiState> state;
+    in property <bool> enabled;
+    in property <bool> show_error_icon;
+
+    callback abort_clicked();
+    callback toggle_selection_clicked();
+    callback error_icon_clicked();
+
+    alignment: end;
+    padding: 30px;
+    spacing: 16px;
+    y: 0px;
+    height: 65px;
+    
+    pure function can_self_select() -> bool {
+        return root.state != UiState.in-production 
+            && root.state != UiState.finished-animation
+            && root.state != UiState.finished-funfact;
+    }
+
+    if root.show_error_icon: VerticalLayout {
+        alignment: center;
+        height: parent.height;
+        Image {
+            source: @image-url("../assets/images/Error_Icon_Toolbar.svg");
+            height: 52px;
+            width: 52px;
+            TouchArea { 
+                enabled: root.enabled;
+                clicked => { root.error_icon_clicked() }
+            }
+        }
+    }
+
+    if root.state == UiState.in-production: Rectangle {
+        height: 56px;
+        width: 160px;
+        padding-top: (parent.height - self.height) / 2;
+        border-color: Palette.milk-color;
+        border-radius: self.height/2;
+        border-width: 4px;
+        TouchArea { 
+            enabled: root.enabled;
+            clicked => { root.abort_clicked() }
+        }
+
+        Text {
+            color: Palette.milk-color;
+            font-size: Palette.font-size-normal;
+            font-family: "Roboto";
+            text: "Abort";
+        }
+    }
+
+    if can_self_select(): Rectangle {
+        height: 56px;
+        width: 160px;
+        padding-top: (root.height - self.height) / 2;
+        border-color: Palette.milk-color;
+        border-radius: self.height/2;
+        border-width: 4px;
+
+        toucharea := TouchArea {
+            enabled: root.enabled;
+            clicked => { root.toggle_selection_clicked() } 
+        }
+
+        Text {
+            color: Palette.milk-color;
+            font-size: Palette.font-size-normal;
+            font-family: "Roboto";
+            text: toggle_state_text;
+        }
+    }
+
+    Image {
+        height: 62px;
+        width: 62px;
+        source: @image-url("../assets/images/cloudflight_logo.svg");
+    }
+}

@@ -1,0 +1,14 @@
+# Copyright (c) 2025 Cloudflight. All rights reserved. 
+[Unit]
+Description=coffee-app, presenting the slint.ui
+After=weston.service
+Requires=weston.service
+ 
+[Service]
+Restart=on-failure
+Type=forking
+ExecStart=/opt/coffeemachine-app/launch.sh
+RestartSec=5
+ 
+[Install]
+WantedBy=multi-user.target

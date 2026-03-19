@@ -1,0 +1,132 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+import { Palette } from "../assets/colors.slint";
+import "../assets/fonts/Roboto/Roboto-Regular.ttf";
+import "../assets/fonts/Roboto/Roboto-Medium.ttf";
+import "../assets/fonts/Roboto/Roboto-Bold.ttf";
+import { Toolbar } from "../components/toolbar.slint";
+import { Product } from "../models/products.slint";
+import { UiState } from "../models/ui-states.slint";
+
+export component ManualSelectionScreen inherits Rectangle {
+    in-out property <[Product]> products: [];
+
+    in property <bool> enabled: true;
+    /// Show error dialog instead of starting a production if this is true.
+    in property <bool> no_production_possible: false;
+    in property <bool> show_error_icon: false;
+
+    callback set_auto_selection();
+    callback open_error_dialog();
+    callback start_production(int);
+
+    background: Palette.background_dark;
+
+    Text {
+        x: 40px;
+        y: 29px;
+        color: Palette.milk-color;
+        font-size: Palette.font-size-normal;
+        font-family: "Roboto";
+        text: "Select a coffee";
+    }
+    
+    Text {
+        x: 40px;
+        y: 69px;
+        color: Palette.milk-color;
+        font-size: Palette.font-size-large;
+        font-family: "Roboto";
+        font-weight: 700;
+        text: "Menu";
+    }
+    
+    Text {
+        x: 40px;
+        y: 163px;
+        color: Palette.milk-color;
+        font-size: Palette.font-size-normal;
+        font-family: "Roboto";
+        text: "Our most popular products:";
+    }
+
+    Toolbar {
+        toggle_state_text: "Auto select";
+        state: UiState.manual-selection;
+        enabled: enabled;
+        show_error_icon: show_error_icon;
+
+        abort_clicked => { }
+        toggle_selection_clicked => { set_auto_selection() }
+        error_icon_clicked => { open_error_dialog() }
+    }
+
+    Rectangle {
+        y: 225px;
+        height: 2px;
+        width: root.width * 0.93;
+        background: Palette.background_mid;
+    }
+
+    pure public function getImageName(id: int) -> image {
+        if (id == 0) {
+            return @image-url("../assets/images/Coffee-Button.png");
+        }
+        if (id == 1) {
+            return @image-url("../assets/images/Espresso-Button.png");
+        }
+        if (id == 2) {
+            return @image-url("../assets/images/Latte-Button.png");
+        }
+        return @image-url("../assets/images/Coffee-Button.png");
+    }
+
+    VerticalLayout {
+        x: 32px;
+        alignment: center;
+
+        Flickable {
+            HorizontalLayout {
+                alignment: center;
+
+                for product in products : Image {
+                    height: 245px + 16px + 8px;
+                    width: 245px + 16px;
+                    source: @image-url("../assets/images/button_background_with_shadow.png");
+
+                    Rectangle {
+                        height: 245px;
+                        width: 245px;
+                        x: 8px;
+                        y: 8px;
+
+                        Text {
+                            y: 28px;
+                            color: Palette.milk-color;
+                            font-size: Palette.font-size-normal;
+                            font-family: "Roboto";
+                            font-weight: 500;
+                            text: product.name;
+                        }
+
+                        Image {
+                            source: getImageName(product.iconId);
+                            y: 54px;
+                        }
+
+                        TouchArea {
+                            enabled: root.enabled;
+                            clicked => {
+                                // FIXME maybe allow anyway?
+                                if (no_production_possible) {
+                                    root.open_error_dialog();
+                                } else {
+                                    root.start_production(product.productId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

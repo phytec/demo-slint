@@ -1,0 +1,85 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+import { Palette } from "../assets/colors.slint";
+import "../assets/fonts/Roboto/Roboto-Regular.ttf";
+
+export component ErrorOverlay inherits Rectangle {
+
+    callback close_overlay();
+
+    height: 640px;
+    width: 1024px;
+
+    /*
+    box-shadow: 0px 7px 15px 0px rgba(10, 2, 13, 0.10),
+                0px 27px 27px 0px rgba(10, 2, 13, 0.09),
+                0px 61px 36px 0px rgba(10, 2, 13, 0.05),
+                0px 108px 43px 0px rgba(10, 2, 13, 0.01),
+                0px 168px 47px 0px rgba(10, 2, 13, 0.00);
+    */
+    drop-shadow-color: rgba(10, 2, 13, 0.25);
+    drop-shadow-offset-y: 60px;
+    drop-shadow-blur: 40px;
+
+    border-radius: 48px;
+    background: @radial-gradient(circle,
+            Palette.background_light 0%,
+            Palette.background_light.mix(Palette.background_mid, 87%) 50%,
+            Palette.background_mid 100%
+        );
+
+    HorizontalLayout {
+        alignment: center;
+        VerticalLayout {
+            alignment: center;
+            spacing: 50px;
+            VerticalLayout {
+                alignment: center;
+                spacing: 0px;
+                HorizontalLayout {
+                    spacing: 10px;
+                    Image {
+                        source: @image-url("../assets/images/Error_Icon_Dialog.svg");
+                    }
+                    Text {
+                        horizontal-alignment: center;
+                        font-size: 30px;
+                        font-family: "Roboto";
+                        color: Palette.warn-color;
+                        text: "Oops! An error occurred";
+                    }
+                }
+                Text {
+                    horizontal-alignment: center;
+                    font-size: Palette.font_size_normal;
+                    font-family: "Roboto";
+                    color: Palette.milk-color;
+                    text: "Resolve error in order to proceed.";
+                }
+            }
+        }
+    }
+
+    VerticalLayout {
+        padding: 60px;
+        alignment: end;
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                height: 56px;
+                width: 120px;
+                border-color: Palette.milk-color;
+                border-radius: self.height/2;
+                border-width: 4px;
+                TouchArea { clicked => { root.close_overlay() } }
+
+                Text {
+                    padding: 24px;
+                    color: Palette.milk-color;
+                    font-size: Palette.font-size-normal;
+                    font-family: "Roboto";
+                    text: "Close";
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,11 @@
+# Copyright (c) 2025 Cloudflight. All rights reserved. 
+[Unit]
+Description=Mocker for the CoreService, which automatically rotates through states.
+ 
+[Service]
+Restart=on-failure
+ExecStart=/usr/bin/node /opt/coffeemachine-app/auto_coreservice_mock.js
+RestartSec=5
+ 
+[Install]
+WantedBy=multi-user.target

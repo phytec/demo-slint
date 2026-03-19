@@ -1,0 +1,255 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+import { Palette } from "../assets/colors.slint";
+import "../assets/fonts/Roboto/Roboto-Regular.ttf";
+import "../assets/fonts/Roboto/Roboto-Bold.ttf";
+import { Product } from "../models/products.slint";
+import { UiState } from "../models/ui-states.slint";
+
+export component Finished inherits Rectangle {
+    in-out property <UiState> state;
+    in property <duration>  elapsed_since_state_change;
+    in-out property <Product> product;
+
+    private property <duration> show_enjoy_message_delay: 2000ms;
+
+    background: Palette.background_mid.transparentize(100%);
+
+    pure public function getImageName(id: int) -> image {
+        if (id == 0) {
+            return @image-url("../assets/images/Coffee-Finished.png");
+        }
+        if (id == 1) {
+            return @image-url("../assets/images/Espresso-Finished.png");
+        }
+        if (id == 2) {
+            return @image-url("../assets/images/Latte-Finished.png");
+        }
+        return @image-url("../assets/images/Coffee-Finished.png");
+    }
+
+    states [
+        prepareflash when root.state == UiState.in-production: {
+            background: #ffffff00;
+        }
+        show when root.state == UiState.finished-animation || root.state == UiState.finished-funfact: {
+            background: @radial-gradient(circle,
+                Palette.background_light 0%,
+                Palette.background_mid 100%
+            );
+            in {
+                animate background {duration: Palette.animation-duration;}
+            }
+            out {
+                animate background {duration: Palette.animation-duration;}
+            }
+        }
+    ]
+
+    Rectangle {
+        y: root.height;
+        opacity: 0;
+
+        Image {
+            opacity: root.state == UiState.finished-animation ? 1 : 0;
+            source: @image-url("../assets/images/Star.svg");
+            height: 40px + (sin(360deg * animation-tick() / 2.8s )) * 5px;
+            width: 40px + (sin(360deg * animation-tick() / 2.8s )) * 5px;
+            x: 300px- self.width / 2 + (sin(360deg * animation-tick() / 2s )) * 20px;
+            y: 200px - self.width / 2 + (sin(360deg * animation-tick() / 2.5s )) * 20px;
+        }
+
+        Image {
+            source: @image-url("../assets/images/Star.svg");
+            height: 30px + (sin(360deg * animation-tick() / 2.8s )) * 5px;
+            width: 30px + (sin(360deg * animation-tick() / 2.8s )) * 5px;
+            x: 800px- self.width / 2 + (sin(360deg * animation-tick() / 2.4s )) * 20px;
+            y: 300px- self.width / 2 + (sin(360deg * animation-tick() / 1.8s )) * 20px;
+        }
+
+        Image {
+            source: @image-url("../assets/images/Star.svg");
+            height: 50px + (sin(360deg * animation-tick() / 2.6s )) * 5px;
+            width: 50px + (sin(360deg * animation-tick() / 2.6s )) * 5px;
+            x: 350px- self.width / 2 + (sin(360deg * animation-tick() / 2.1s )) * 20px;
+            y: 500px- self.width / 2 + (sin(360deg * animation-tick() / 2.3s )) * 20px;
+        }
+
+        Image {
+            source: @image-url("../assets/images/Star-2.svg");
+            height: 30px + (sin(360deg * animation-tick() / 2s )) * 5px;
+            width: 30px + (sin(360deg * animation-tick() / 2s )) * 5px;
+            x: 400px- self.width / 2 + (sin(360deg * animation-tick() / 2.15s )) * 20px;
+            y: 550px- self.width / 2 + (sin(360deg * animation-tick() / 1.9s )) * 20px;
+        }
+
+        Image {
+            source: @image-url("../assets/images/Star-2.svg");
+            height: 30px + (sin(360deg * animation-tick() / 2.1s )) * 5px;
+            width: 30px + (sin(360deg * animation-tick() / 2.1s )) * 5px;
+            x: 900px- self.width / 2 + (sin(360deg * animation-tick() / 2.1s )) * 20px;
+            y: 250px- self.width / 2 + (sin(360deg * animation-tick() / 2.2s )) * 20px;
+        }
+
+        Image {
+            source: @image-url("../assets/images/Star-2.svg");
+            height: 35px + (sin(360deg * animation-tick() / 2.2s )) * 5px;
+            width: 35px + (sin(360deg * animation-tick() / 2.2s )) * 5px;
+            x: 900px- self.width / 2 + (sin(360deg * animation-tick() / 2.2s )) * 20px;
+            y: 500px- self.width / 2 + (sin(360deg * animation-tick() / 2s )) * 20px;
+        }
+
+        lines_and_coffee := Rectangle {
+            Image {
+                source: @image-url("../assets/images/line.svg");
+                rotation-angle: sin( 360deg * animation-tick() / 5s) * 25deg;
+                width: 500px;
+            }
+            Image {
+                source: @image-url("../assets/images/line.svg");
+                rotation-angle: sin( 360deg * animation-tick() / 5s) * 30deg + 15deg;
+                width: 550px;
+            }
+            Image {
+                source: @image-url("../assets/images/dashed-line.svg");
+                rotation-angle: sin( 360deg * animation-tick() / 5s) * 18deg + 25deg;
+                width: 600px;
+            }
+            Image {
+                source: @image-url("../assets/images/dashed-line.svg");
+                rotation-angle: sin( 360deg * animation-tick() / 5s) * 15deg + 40deg;
+                width: 650px;
+            }
+            Image {
+                source: @image-url("../assets/images/line.svg");
+                rotation-angle: sin( 360deg * animation-tick() / 5s) * 20deg + 35deg;
+                width: 700px;
+            }
+            coffee_cup := Image {
+                y: root.state == UiState.finished-animation || root.state == UiState.finished-funfact
+                    ? ((root.height / 2) - (self.height / 2) + (sin(360deg * animation-tick() / 8s )) * 40px)
+                    : root.height;
+                rotation-angle: sin( 360deg * animation-tick() / 4s) * 20deg;
+                source: getImageName(root.product.iconId);
+                x: root.width / 2 - self.width / 2 + (sin(360deg * animation-tick() / 11s )) * 20px;
+                width: 354px + (sin(360deg * animation-tick() / 6s )) * 40px;
+                height: 354px + (sin(360deg * animation-tick() / 6s )) * 40px;
+
+            }
+
+            states [
+                normal when elapsed_since_state_change < show_enjoy_message_delay && root.state != UiState.finished-funfact: {
+                    opacity: 1;
+                }
+                faded when elapsed_since_state_change >= show_enjoy_message_delay || root.state == UiState.finished-funfact: {
+                    opacity: 0.25;
+                    in {
+                        animate opacity { duration: Palette.animation_duration; }
+                    }
+                }
+            ]
+        }
+
+        
+
+        states [
+            show when root.state == UiState.finished-animation: {
+                opacity: 1;
+                y: 0px;
+                in {
+                    animate opacity, y { duration: Palette.animation-duration; }
+                }
+            }
+            fadeout when root.state == UiState.finished-funfact: {
+                opacity: 0;
+                y: -root.height;
+                in {
+                    animate y, opacity {
+                        duration: Palette.animation-duration;
+                    }
+                }
+            }
+        ]
+    }
+
+    Text {
+        opacity: 1;
+        y: -80px;
+        x: 40px;
+        font-size: Palette.font-size-large;
+        color: Palette.milk-color;
+        font-family: "Roboto";
+        font-weight: 700;
+        states [
+            justfinished when root.state == UiState.finished-animation: {
+                opacity: 0;
+                y: 69px;
+                text: "Woohooo !!!";
+                in {
+                    animate opacity { duration: Palette.animation-duration; delay: 1000ms;}
+                }
+            }
+            funfact when root.state == UiState.finished-funfact: {
+                opacity: 1;
+                y: 69px;
+                text: product.name + " drinkers";
+                in {
+                    animate opacity {
+                        duration: Palette.animation-duration;
+                    }
+                }
+            }
+        ]
+    }
+
+    Text {
+        color: Palette.milk-color;
+        font-family: "Roboto";
+        font-weight: 700;
+        text: "Enjoy your coffee!";
+        states [
+            idle when root.state != UiState.finished-animation: {
+                opacity: 0;
+                font-size: 0px;
+            }
+            show when root.state == UiState.finished-animation: {
+                opacity: 1;
+                font-size: 94px;
+                in {
+                    animate font-size, opacity { duration: Palette.animation-duration; delay: show_enjoy_message_delay + 50ms;}
+                }
+            }
+        ]
+    }
+
+    didyouknowheader:= Text {
+        x: 40px;
+        y: 29px;
+        color: Palette.milk-color;
+        font-family: "Roboto";
+        font-size: Palette.font_size_normal;
+        text: "Did you know?";
+
+        opacity: root.state == UiState.finished-funfact ? 1 : 0;
+        animate opacity { duration: Palette.animation-duration; }
+    }
+
+    
+    HorizontalLayout {
+        alignment: center;
+        VerticalLayout {
+            alignment: center;
+            funfactmaintext := Text {
+                width: 820px;
+                height: 237px;
+                color: Palette.milk-color;
+                font-family: "Roboto";
+                font-size: Palette.font_size_big;
+                text: product.funFact;
+                wrap: TextWrap.word-wrap;
+
+                opacity: root.state == UiState.finished-funfact ? 1 : 0;
+                animate opacity { duration: Palette.animation-duration; }
+            }
+        }
+    }
+}

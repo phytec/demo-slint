@@ -1,0 +1,234 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+import { Button, VerticalBox } from "std-widgets.slint";
+import { Palette } from "../assets/colors.slint";
+import { IngredientComponent, IngredientComponentType } from "../components/ingredient.slint";
+import { Ingredient } from "../models/ingredient.slint";
+import { IdleToProduction } from "../components/idle-to-production.slint";
+import { Finished } from "../components/finished.slint";
+import { Toolbar } from "../components/toolbar.slint";
+import { Product } from "../models/products.slint";
+import { UiState } from "../models/ui-states.slint";
+
+
+export component MainScreen inherits Rectangle {
+
+    in-out property <UiState> state;
+    in property <duration> elapsed_since_state_change;
+
+    in-out property <[Ingredient]> ingredients;
+
+    in-out property <Product> current_production;
+
+    in property <bool> enabled: true;
+    in property <bool> show_error_icon: false;
+    in property <bool> overlay_shown: false;
+
+    callback set_manual_select();
+    callback abort_production();
+    callback open_error_dialog();
+
+    background: state == UiState.in-production || state == UiState.finished-animation || state == UiState.finished-funfact ?
+                    Palette.background_mid : Palette.background_dark;
+
+    IdleToProduction {
+        product: root.current-production;
+        state: root.state;
+        overlay_shown: root.overlay_shown;
+    }
+    
+
+    Finished {
+        state: root.state;
+        elapsed_since_state_change: root.elapsed_since_state_change;
+        product: root.current-production;
+    }
+
+    Toolbar {
+        toggle_state_text: "Self select";
+        state: state;
+        enabled: enabled;
+        show_error_icon: show_error_icon;
+
+        abort_clicked => { abort_production() }
+        toggle_selection_clicked => { set_manual_select() }
+        error_icon_clicked => { open_error_dialog() }
+    }
+
+    // Gets the offset based on an increadient. To place them depending on its amount on top of each other.
+    public pure function getOffset(index: int) -> length {
+        if (index == 1) {
+            return getOffsetIndex(0);
+        }
+        if (index == 2) {
+            return getOffsetIndex(0) + getOffsetIndex(1);
+        }
+        if (index == 3) {
+            return getOffsetIndex(0) + getOffsetIndex(1) + getOffsetIndex(2);
+        }
+        if (index == 4) {
+            return getOffsetIndex(0) + getOffsetIndex(1) + getOffsetIndex(2) + getOffsetIndex(3);
+        }
+        if (index == 5) {
+            return getOffsetIndex(0) + getOffsetIndex(1) + getOffsetIndex(2) + getOffsetIndex(3) + getOffsetIndex(4);
+        }
+        return 0px;;
+    }
+
+    public pure function getOffsetIndex(index: int) -> length {
+        return (root.height - 300px) * (root.ingredients[index].percentage);
+    }
+
+    pure function shouldShowIrritation() -> bool {
+        return root.elapsed-since-state-change > 100ms &&
+               root.elapsed-since-state-change <= 900ms;
+                
+    }
+    
+    for n[i] in ingredients : IngredientComponent {
+        text-color: Palette.background_dark;
+        ingredient: n;
+
+        states [
+            idle when root.state == UiState.idle ||  root.state == UiState.manual-selection: {
+                type: IngredientComponentType.bubble;
+                // Idle floating animation of the increadient boobles.
+                width: 220px + sin(i*80deg + 360deg * animation-tick() / (20s + (i + 1) * 1s)) * 20px;
+                height: self.width;
+                x: i * (root.width / (ingredients.length + 1)) + cos(i*300deg + 360deg * animation-tick() / (20s + (i + 1) * 1s)) * 10px + 110px;
+                y: mod(i, 2) * 200px + sin(i*200deg + 360deg * animation-tick() / (20s + (i + 1) * 1s)) * 30px + 230px;
+            }
+            recognition when root.state == UiState.detection-started: {
+                type: IngredientComponentType.bubble;
+                // Animation of the increadient boobles at recoginition. They are played y centered
+                width: 220px + sin(i*80deg + 360deg * animation-tick() / (20s + (i + 1) * 1s)) * 20px;
+                height: self.width;
+                x: root.width / 2 + mod(i, 2) * 120px - self.width / 2;
+                y: 150px + i * ((root.height - 150px) / (ingredients.length + 1));
+                in {
+                    animate x, y, height, width {duration: Palette.animation-duration;}
+                }
+            }
+            irritated when root.state == UiState.detection-failed && shouldShowIrritation(): {
+                type: IngredientComponentType.bubble;
+                width: 240px;
+                height: self.width;
+                x: root.width / 2 - 40px + mod(i, 2) * 160px - self.width / 2 + sin(360deg * animation-tick() / 250ms + i * 60deg) * 20px;
+                y: 200px + i * ((root.height - 240px) / (ingredients.length + 1));
+                in {
+                    animate x, y, height, width {duration: Palette.animation-duration;}
+                }
+                out {
+                    animate x, y, height, width {duration: Palette.animation-duration;}
+                }
+            }
+            replace_cup when root.state == UiState.detection-failed && !shouldShowIrritation(): {
+                type: IngredientComponentType.bubble;
+                width: 240px;
+                height: self.width;
+                x: root.width / 2 - 40px + mod(i, 2) * 160px - self.width / 2;
+                y: 200px + i * ((root.height - 240px) / (ingredients.length + 1));
+                in {
+                    animate x, y, height, width {duration: 100ms;}
+                }
+                out {
+                    animate x, y, height, width {duration: Palette.animation-duration;}
+                }
+            }
+            selection when root.state == UiState.detected-cup: {
+                type: IngredientComponentType.bar;
+                width: root.width;
+                height: n.percentage > 0 ? (root.height - 300px) * n.percentage : 0px;
+                x: 0px;
+                y: 300px + getOffset(i);
+                in {
+                    animate x, y, height, width {duration: Palette.animation-duration;}
+                }
+            }
+            production when root.state == UiState.in-production: {
+                type: IngredientComponentType.bar;
+                width: root.width;
+                height: n.percentage > 0 ? (root.height - 300px) * n.percentage : 0px;
+                x: 0px;
+                y: 300px + getOffset(i);
+                // Blinking animation at production
+                background: n.color.mix(Palette.background_dark,
+                    max(sin(360deg * animation-tick() / 4s + (ingredients.length - i) * (360deg / (ingredients.length + 1))) * 0.35 + 0.75, 0.6));
+                in {
+                    animate x, y, height, width {duration: Palette.animation-duration;}
+                }
+            }
+            finished when root.state == UiState.finished-animation: {
+                type: IngredientComponentType.bar;
+                x: 0px;
+                y: root.height + getOffset(i);
+                width: root.width;
+                height: (root.height - 300px) * n.percentage;
+                opacity: 0;
+                in {
+                    animate x, y, opacity {duration: Palette.animation-duration;}
+                }
+            }
+            funfact when root.state == UiState.finished-funfact: {
+                type: IngredientComponentType.bubble;
+                width: 220px;
+                height: self.width;
+                x: i * (root.width / (ingredients.length + 1)) + 120px;
+                y: mod(i, 2) * 200px + root.height;
+                out {
+                    animate x, y {
+                        duration: 5s;
+                        easing: ease;
+                    }
+                }
+            }
+        ]
+    }
+}
+
+
+component PreviewHelper inherits MainScreen {
+    height: 800px;
+    width: 1280px;
+    enabled: true;
+    show_error_icon: true;
+    current_production: {
+        name: "Latte Macchiato",
+        productId: 2,
+        iconId: 2,
+        ingredients: []
+    };
+
+    state: UiState.idle;
+    elapsed_since_state_change: 0ms;
+
+    ingredients: [
+        {
+            name: "Milk",
+            percentage: 10%,
+            color: Palette.milk-color
+        },
+        {
+            name: "Coffee",
+            percentage: 49.9%,
+            color: Palette.coffee-color
+        },
+        {
+            name: "Espresso",
+            percentage: 20%,
+            color: Palette.espresso-color
+        },
+        {
+            name: "Water",
+            percentage: 0%,
+            color: Palette.water-color
+        }
+    ];
+
+    TouchArea {
+        x: 0;
+        y: 0;
+        width: root.width / 2;
+        height: root.height / 2;
+        clicked => {root.state = UiState.idle; }
+    }
+}

@@ -1,0 +1,91 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+
+import { Palette } from "../assets/colors.slint";
+import "../assets/fonts/Roboto/Roboto-Medium.ttf";
+import "../assets/fonts/Roboto/Roboto-Bold.ttf";
+import { Ingredient } from "../models/ingredient.slint";
+
+
+component IngredientText {
+    height: 100%;
+    width: 100%;
+    in property text <=> text_element.text;
+    in property color <=> text_element.color;
+    in property font-weight <=> text_element.font-weight;
+    in property horizontal-alignment <=> horizontal.alignment;
+
+    VerticalLayout {
+        alignment: center;
+        horizontal := HorizontalLayout {
+            alignment: center;
+            padding-left: 16px;
+            padding-right: 16px;
+            text_element := Text {
+
+                //text: root.height != 0px ? root.name : "";
+                font-size: Palette.font-size-normal;
+                font-family: "Roboto";
+            }
+        }
+    }
+}
+
+export enum IngredientComponentType {
+    bubble,
+    bar
+}
+export component IngredientComponent inherits Rectangle {
+    in property <Ingredient> ingredient;
+    in property <brush> text-color;
+    in property <IngredientComponentType> type;
+
+    background: ingredient.color;
+
+    border-radius: self.height / 2;
+
+    drop-shadow-color: ingredient.color.transparentize(0.7);
+
+    // force conversion to int to round to nearest value
+    pure function floatToPercentInt(x: float) -> int {
+        return (x + 0.0049) * 100;
+    }
+
+    bubble-text := IngredientText {
+        text: ingredient.name;
+        color: root.text-color;
+        horizontal-alignment: center;
+        font-weight: 700;
+    }
+
+    bar-text := IngredientText {
+        text: floatToPercentInt(ingredient.percentage) + "% " + ingredient.name + " —";
+        color: root.text-color;
+        horizontal-alignment: end;
+        font-weight: 500;
+    }
+
+    states [
+        bubble when type == IngredientComponentType.bubble: {
+            bubble-text.opacity: 100%;
+            bar-text.opacity: 0%;
+            border-radius: self.height / 2;
+            drop-shadow-offset-y: 20px;
+            drop-shadow-blur: 100px;
+            in {
+                animate border-radius {
+                    duration: Palette.animation-duration;
+                }
+            }
+        }
+        bar when type == IngredientComponentType.bar: {
+            bubble-text.opacity: 0%;
+            bar-text.opacity: 100%;
+            border-radius: 0px;
+            in {
+                animate border-radius {
+                    duration: Palette.animation-duration;
+                }
+            }
+        }
+    ]
+}

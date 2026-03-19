@@ -1,0 +1,21 @@
+{
+    "name": "counter",
+    "version": "1.0.0",
+    "main": "websocketserver/auto_coreservice_mock.js",
+    "bin": "websocketserver/auto_coreservice_mock.js",
+    "dependencies": {
+        "ws": "8.14.2"
+    },
+    "devDependencies": {
+        "json-server": "^0.17.3",
+        "keypress": "0.2.1",
+        "webpack": "^5.90.2",
+        "webpack-cli": "^5.1.4"
+    },
+    "scripts": {
+        "start": "node ."
+    },
+    "engines": {
+        "node": "<=16.0.0"
+    }
+}

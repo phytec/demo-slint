@@ -1,0 +1,208 @@
+// Copyright (c) 2025 Cloudflight. All rights reserved. 
+import { Palette } from "../assets/colors.slint";
+import "../assets/fonts/Roboto/Roboto-Regular.ttf";
+import "../assets/fonts/Roboto/Roboto-Bold.ttf";
+import { Product } from "../models/products.slint";
+import { UiState } from "../models/ui-states.slint";
+export component IdleToProduction inherits Rectangle {
+    in-out property <UiState> state;
+    in-out property <Product> product;
+    in property <bool> overlay_shown;
+
+    idle_text := Rectangle {
+        opacity: root.state == UiState.idle ? 1 : 0;
+        animate opacity {duration: Palette.animation-duration;}
+        Text {
+            x: 40px;
+            y: 29px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-normal;
+            font-family: "Roboto";
+            text: "What to do next?";
+        }
+        
+        Text {
+            x: 40px;
+            y: 69px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-large;
+            font-family: "Roboto";
+            font-weight: 700;
+            text: "Just Place a cup ...";
+        }
+        
+        HorizontalLayout {
+            x: 40px;
+            y: 163px;
+            alignment: start;
+
+            Text {
+                color: Palette.milk-color;
+                font-size: Palette.font-size-normal;
+                font-family: "Roboto";
+                text: "or self select a product ";
+            }
+            Text {
+                color: Palette.milk-color;
+                font-size: Palette.font-size-normal;
+                font-family: "Roboto";
+                text: "(but that would be boring)";
+            }
+        }
+    }
+
+    lets_see_text := Rectangle {
+        opacity: root.state == UiState.detection-started ? 1 : 0;
+        animate opacity {duration: Palette.animation-duration;}
+        Text {
+            x: 40px;
+            y: 29px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-normal;
+            font-family: "Roboto";
+            text: "What to do next?";
+        }
+
+        Text {
+            x: 40px;
+            y: 69px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-large;
+            font-family: "Roboto";
+            font-weight: 700;
+            letter-spacing: abs(sin(360deg * animation-tick() / 3s)) * 4px;
+            text: "Let`s see ...";
+        }
+    }
+
+
+    detection_failed_text := Rectangle {
+        opacity: root.state == UiState.detection-failed ? 1 : 0;
+        animate opacity {duration: Palette.animation-duration;}
+        Text {
+            x: 40px;
+            y: 29px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-normal;
+            font-family: "Roboto";
+            text: "Cup has been removed ...";
+        }
+        
+        Text {
+            x: 40px;
+            y: 69px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-large;
+            font-family: "Roboto";
+            font-weight: 700;
+            text: "Place a new cup";
+        }
+        
+        HorizontalLayout {
+            x: 40px;
+            y: 163px;
+            alignment: start;
+
+            Text {
+                color: Palette.milk-color;
+                font-size: Palette.font-size-normal;
+                font-family: "Roboto";
+                text: "Or reposition if the cup recognition has made a mistake. ";
+            }
+            Text {
+                color: Palette.milk-color;
+                font-size: Palette.font-size-normal;
+                font-family: "Roboto";
+                text: "(Happens to the best)";
+            }
+        }
+    }
+
+
+    detected_coffee := Rectangle {
+        opacity: root.state == UiState.detected-cup ? 1 : 0;
+        animate opacity {duration: Palette.animation-duration;} 
+
+        Rectangle {
+            y: 0px; 
+            background: Palette.background_mid;
+            height: 300px;
+            states [
+                hidden when root.state != UiState.detected-cup || overlay_shown: {
+                    x: 0px;
+                    width: 0px;
+                }
+                running when root.state == UiState.detected-cup && !overlay_shown: {
+                    x: 0;
+                    width: root.width;
+                    in {
+                        animate width {duration: 5s; iteration-count: 1;}
+                    }
+                }
+            ]
+        }
+
+        Text {
+            x: 40px;
+            y: 29px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-normal;
+            font-family: "Roboto";
+            text: "Detected Coffee";
+        }
+
+        Text {
+            x: 40px;
+            y: 69px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-large;
+            font-family: "Roboto";
+            font-weight: 700;
+            text: root.product.name;
+        }
+        
+        HorizontalLayout {
+            padding-left: 40px;
+            padding-right: 21px;
+            y: 163px;
+            width: root.width;
+            alignment: LayoutAlignment.space-between;
+            Text {
+                color: Palette.milk-color;
+                font-size: Palette.font-size-normal;
+                font-family: "Roboto";
+                text: "Auto producing in 5 seconds ...";
+            }
+            Text {
+                color: Palette.milk-color;
+                font-size: Palette.font-size-normal;
+                font-family: "Roboto";
+                text: "Abort via “Self select” or removing the cup.";
+            }
+        }
+    }
+
+    producing := Rectangle {
+        opacity: root.state == UiState.in-production ? 1 : 0;
+        animate opacity {duration: Palette.animation-duration;} 
+        
+        Text {
+            x: 40px;
+            y: 29px;
+            color: Palette.milk-color;
+            font-size: Palette.font_size_normal;
+            font-family: "Roboto";
+            text: "We’re in production";
+        }
+        
+        Text {
+            x: 40px;
+            y: 69px;
+            color: Palette.milk-color;
+            font-size: Palette.font-size-large;
+            font-family: "Roboto";
+            font-weight: 700;
+            text: root.product.name;
+        }
+    }
+}

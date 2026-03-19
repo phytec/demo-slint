@@ -1,0 +1,23 @@
+# Copyright (c) 2025 Cloudflight. All rights reserved. 
+[package]
+name = "NextCoffee"
+version = "0.1.0"
+authors = ["Felix Marek", "Thomas Friedel"]
+edition = "2021"
+build = "build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+usvg = "0.36.0"
+slint = { version = "1.9.1", default-features = false, features = ["std", "compat-1-2", "backend-winit", "renderer-skia"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9.31"
+openssl = { version = "0.10", features = ["vendored"] }
+tungstenite = "0.21.0"
+url = "2.5.0"
+websocket = "0.27.0"
+
+[build-dependencies]
+slint-build = "1.9.1"
