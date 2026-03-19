@@ -7,8 +7,9 @@ Requires=weston.service
 [Service]
 Restart=on-failure
 Type=forking
-ExecStart=/opt/coffeemachine-app/launch.sh
+Environment=WAYLAND_DISPLAY=/run/wayland-0 SLINT_FULLSCREEN=1
+ExecStart=/usr/bin/NextCoffee
 RestartSec=5
- 
+
 [Install]
 WantedBy=multi-user.target
