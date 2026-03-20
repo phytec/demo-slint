@@ -32,9 +32,9 @@ The application expects the websocket server endpoint to be reachable on the sam
 `ws:://localhost:3000/frontend`.
 
 To use a different websocket server endpoint, you can place a `config.yaml` file in
-`/usr/share/coffeeapp`, with the custom address set in the parameter `websocket_address`. E.g.:
+`/usr/share/coffee-app`, with the custom address set in the parameter `websocket_address`. E.g.:
 ```sh
-echo 'websocket_address: ws://192.168.3.10:3000/frontend' >| /opt/coffeemachine-app/config.yaml
+echo 'websocket_address: ws://192.168.3.10:3000/frontend' >| /usr/share/coffee-app/config.yaml
 ```
 
 ## Licensing
