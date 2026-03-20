@@ -102,7 +102,7 @@ impl Into<Product> for SendableProduct {
 
 fn read_config_file() -> Result<String, Box<dyn Error>> {
     let mut config_path = std::env::current_exe()?;
-    config_path.set_file_name("/usr/share/coffeeapp/config.yaml");
+    config_path.set_file_name("/usr/share/coffee-app/config.yaml");
     Ok(read_to_string(config_path)?)
 }
 
